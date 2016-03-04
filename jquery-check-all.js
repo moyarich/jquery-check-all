@@ -16,14 +16,15 @@
   checkAll.prototype.init = function() {
     this._checkChildren();
 
-    var plugin = this;
+    var plugin     = this,
+        $container = plugin.$el.closest(plugin.options.container),
+        $children  = $(plugin.options.childCheckboxes, $container).not(plugin.$el);
 
     this.$el.on('change', function(e) {
-      var $children = $(plugin.options.childCheckboxes, plugin.options.container).not(plugin.$el);
       $children.prop('checked', $(this).prop('checked'));
     });
-
-    $(this.options.container).on('change', plugin.options.childCheckboxes, function(e) {
+  
+    $(document).on('change', $children, function(e) {
       plugin._checkChildren();
     });
   };
@@ -39,15 +40,15 @@
   }
 
   checkAll.prototype._checkChildren = function() {
-    var totalCount = $(this.options.childCheckboxes, this.options.container).not(this.$el).length;
-    var checkedCount = $(this.options.childCheckboxes,this.options.container)
-      .filter(':checked').not(this.$el).length;
+    var plugin        = this,
+        $container    = plugin.$el.closest(plugin.options.container),
+        $children     = $(plugin.options.childCheckboxes, $container).not(plugin.$el),
+        totalCount    = $children.length,
+        checkedCount  = $children.filter(':checked').length,
+        indeterminate = plugin.options.showIndeterminate && checkedCount > 0 && checkedCount < totalCount;
 
-    var indeterminate = this.options.showIndeterminate &&
-      checkedCount > 0 && checkedCount < totalCount;
-
-    this.$el.prop('indeterminate', indeterminate);
-    this.$el.prop('checked', checkedCount === totalCount && totalCount !== 0);
+        plugin.$el.prop('indeterminate', indeterminate);
+        plugin.$el.prop('checked', checkedCount === totalCount && totalCount !== 0);
   }
 
 })(jQuery, window, document);
